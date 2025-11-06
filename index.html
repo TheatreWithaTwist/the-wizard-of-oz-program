@@ -1,47 +1,84 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>The Wizard of Oz Program</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     body {
       margin: 0;
-      background: #fff;
+      background: #f7f7f7; /* subtle backdrop so pages “float” */
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
     }
+
     #pdf-viewer {
       width: 100%;
+      max-width: 900px; /* nice for desktop */
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 10px 0;
     }
+
+    .page {
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+      margin: 10px 0;
+      width: 95%;
+      max-width: 850px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
     canvas {
       width: 100%;
       height: auto;
-      background: #fff;
-      margin-bottom: 10px;
+      display: block;
+    }
+
+    /* Make it feel like flipping through pages */
+    @media (max-width: 768px) {
+      #pdf-viewer {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+      }
+      .page {
+        margin: 8px 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
     }
   </style>
 </head>
+
 <body>
   <div id="pdf-viewer"></div>
 
   <script>
     const url = 'TWT - THE WIZARD OF OZ, YOUTH EDITION PROGRAM.pdf';
-
     const container = document.getElementById('pdf-viewer');
 
     pdfjsLib.getDocument(url).promise.then(pdf => {
       for (let i = 1; i <= pdf.numPages; i++) {
         pdf.getPage(i).then(page => {
-          const viewport = page.getViewport({ scale: 1.5 });
+          const scale = window.innerWidth < 768 ? 1.2 : 1.5;
+          const viewport = page.getViewport({ scale });
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
+
           canvas.height = viewport.height;
           canvas.width = viewport.width;
-          container.appendChild(canvas);
+
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('page');
+          wrapper.appendChild(canvas);
+          container.appendChild(wrapper);
+
           page.render({ canvasContext: context, viewport });
         });
       }
